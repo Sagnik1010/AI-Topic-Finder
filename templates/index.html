@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sigma Web Dev Course - AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .search-section {
+            padding: 40px;
+            background: linear-gradient(to bottom, #f8f9fa, white);
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 1.1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-button {
+            display: block;
+            width: 100%;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-button:active {
+            transform: translateY(0);
+        }
+
+        .search-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            padding: 40px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .answer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .answer-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .answer-box p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .video-chunks {
+            margin-top: 30px;
+        }
+
+        .video-chunks h3 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chunk-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .chunk-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chunk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .video-title {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .video-number {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .timestamp {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chunk-text {
+            color: #495057;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .error-box {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #c33;
+        }
+
+        .examples {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .examples h4 {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .example-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .example-pill {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .example-pill:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .search-section, .results-section {
+                padding: 20px;
+            }
+
+            .chunk-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sigma Web Development Course</h1>
+            <p>AI-Powered Video Topic Finder - Ask anything about the course!</p>
+        </div>
+
+        <div class="main-card">
+            <div class="search-section">
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="questionInput"
+                        placeholder="Ask me anything... e.g., 'How do I use CSS selectors?'"
+                        autocomplete="off"
+                    >
+                </div>
+                <button class="search-button" id="askButton">
+                    Ask Question
+                </button>
+
+                <div class="examples">
+                    <h4>Try these examples:</h4>
+                    <div class="example-pills">
+                        <span class="example-pill" onclick="setQuestion('Where is CSS explained?')">Where is CSS explained?</span>
+                        <span class="example-pill" onclick="setQuestion('What are HTML forms?')">What are HTML forms?</span>
+                        <span class="example-pill" onclick="setQuestion('How to use classes and IDs?')">How to use classes and IDs?</span>
+                        <span class="example-pill" onclick="setQuestion('What are semantic tags?')">What are semantic tags?</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; font-weight: 600;">Searching through course videos...</p>
+            </div>
+
+            <div class="results-section" id="results">
+                <div class="answer-box">
+                    <h2>
+                        <span>💡</span>
+                        Answer
+                    </h2>
+                    <p id="answerText"></p>
+                </div>
+
+                <div class="video-chunks">
+                    <h3>
+                        <span>🎥</span>
+                        Related Video Segments
+                    </h3>
+                    <div id="chunksContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questionInput = document.getElementById('questionInput');
+        const askButton = document.getElementById('askButton');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const answerText = document.getElementById('answerText');
+        const chunksContainer = document.getElementById('chunksContainer');
+
+        function setQuestion(question) {
+            questionInput.value = question;
+            questionInput.focus();
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            // Show loading
+            loading.classList.add('show');
+            results.classList.remove('show');
+            askButton.disabled = true;
+            askButton.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Display answer
+                    answerText.textContent = data.answer;
+
+                    // Display chunks
+                    chunksContainer.innerHTML = '';
+                    if (data.chunks && data.chunks.length > 0) {
+                        data.chunks.forEach(chunk => {
+                            const chunkCard = document.createElement('div');
+                            chunkCard.className = 'chunk-card';
+                            chunkCard.innerHTML = `
+                                <div class="chunk-header">
+                                    <div class="video-title">${chunk.title}</div>
+                                    <div class="video-number">Video #${chunk.number}</div>
+                                </div>
+                                <div class="timestamp">
+                                    ⏱️ ${formatTime(chunk.start)} - ${formatTime(chunk.end)}
+                                </div>
+                                <div class="chunk-text">${chunk.text}</div>
+                            `;
+                            chunksContainer.appendChild(chunkCard);
+                        });
+                    }
+
+                    // Show results
+                    results.classList.add('show');
+                } else {
+                    answerText.innerHTML = `<div class="error-box">${data.error || 'An error occurred'}</div>`;
+                    results.classList.add('show');
+                }
+            } catch (error) {
+                answerText.innerHTML = `<div class="error-box">Failed to connect to the server. Please make sure the server is running.</div>`;
+                results.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                askButton.disabled = false;
+                askButton.textContent = 'Ask Question';
+            }
+        }
+
+        askButton.addEventListener('click', askQuestion);
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
